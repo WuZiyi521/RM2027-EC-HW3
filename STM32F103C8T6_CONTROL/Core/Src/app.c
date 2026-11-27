@@ -189,7 +189,6 @@ static void render_display(void)
     return;
   }
 
-  OLED_Clear();
   snprintf(line, sizeof(line), "STATE: %s", s_state.running ? "RUN" : "PAUSE");
   OLED_PrintLine(0U, line);
   snprintf(line, sizeof(line), "DIR: %s", s_state.reverse ? "REV" : "FWD");

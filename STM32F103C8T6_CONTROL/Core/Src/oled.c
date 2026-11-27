@@ -6,6 +6,7 @@
 
 #define OLED_I2C_ADDRESS 0x78U
 #define OLED_WIDTH       128U
+#define OLED_COLUMN_START 0x02U
 
 typedef struct
 {
@@ -173,7 +174,7 @@ static const uint8_t *glyph_for(char character)
 bool OLED_Init(void)
 {
   static const uint8_t init_commands[] = {
-    0xAE, 0x20, 0x00, 0xB0, 0xC8, 0x00, 0x10, 0x40,
+    0xAE, 0x2E, 0x20, 0x00, 0xB0, 0xC8, 0x02, 0x10, 0x40,
     0x81, 0xCF, 0xA1, 0xA6, 0xA8, 0x3F, 0xA4, 0xD3,
     0x00, 0xD5, 0x80, 0xD9, 0xF1, 0xDA, 0x12, 0xDB,
     0x40, 0x8D, 0x14, 0xAF
@@ -199,7 +200,11 @@ void OLED_Clear(void)
 
   for (uint8_t page = 0U; page < 8U; ++page)
   {
-    uint8_t cursor[3] = {(uint8_t)(0xB0U | page), 0x00U, 0x10U};
+    uint8_t cursor[3] = {
+      (uint8_t)(0xB0U | page),
+      (uint8_t)(OLED_COLUMN_START & 0x0FU),
+      (uint8_t)(0x10U | (OLED_COLUMN_START >> 4U))
+    };
     if (!i2c_write_block(0x00U, cursor, sizeof(cursor)))
     {
       return;
@@ -240,7 +245,11 @@ void OLED_PrintLine(uint8_t page, const char *text)
     pixels[column++] = 0x00U;
   }
 
-  uint8_t cursor[3] = {(uint8_t)(0xB0U | page), 0x00U, 0x10U};
+  uint8_t cursor[3] = {
+    (uint8_t)(0xB0U | page),
+    (uint8_t)(OLED_COLUMN_START & 0x0FU),
+    (uint8_t)(0x10U | (OLED_COLUMN_START >> 4U))
+  };
   if (i2c_write_block(0x00U, cursor, sizeof(cursor)))
   {
     (void)i2c_write_block(0x40U, pixels, sizeof(pixels));
